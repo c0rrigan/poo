@@ -43,3 +43,4 @@ nbdist/
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 
+/Transpmex/target/
