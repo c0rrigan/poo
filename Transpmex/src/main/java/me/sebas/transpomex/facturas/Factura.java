@@ -131,14 +131,14 @@ public class Factura {
     /**
      * @return the retraso
      */
-    public int getRetraso() {
+    public short getRetraso() {
         return retraso;
     }
 
     /**
      * @param retraso the retraso to set
      */
-    public void setRetraso(int retraso) {
+    public void setRetraso(short retraso) {
         this.retraso = retraso;
     }
 
@@ -163,7 +163,7 @@ public class Factura {
     private float pesoCarga;
     private Fecha fechaSalida;
     private Fecha fechaEntrega;
-    private int retraso;
+    private short retraso;
     private float precioNeto;
 
     public Factura() {
@@ -181,7 +181,7 @@ public class Factura {
  * @param retraso
  * @param precioNeto 
  */
-    public Factura(int id, String key, Direccion dir, String tipoEnvio, float volCarga, float pesoCarga,Fecha fechaSalida,Fecha fechaEntrega, int retraso, float precioNeto) {
+    public Factura(int id, String key, Direccion dir, String tipoEnvio, float volCarga, float pesoCarga,Fecha fechaSalida,Fecha fechaEntrega, short retraso, float precioNeto) {
         this.id = id;
         this.dir = dir;
         this.tipoEnvio = tipoEnvio;

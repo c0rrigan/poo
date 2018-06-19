@@ -54,4 +54,10 @@ public class Fecha {
         c.set(getAnio(), getMes(), getDia());
         return c.getTimeInMillis();
     }
+
+    @Override
+    public String toString() {
+        return anio+"-"+mes+"-"+dia;
+    }
+    
 }

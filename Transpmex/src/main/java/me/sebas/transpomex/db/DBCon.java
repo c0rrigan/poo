@@ -30,7 +30,10 @@ public class DBCon {
     private String DELETE_VEHICULOS_STMT = "delete from vehiculos where vehiculos.id_vehiculo = ?";
     private String UPDATE_VEHICULOS_STMT = "update vehiculos set matr =?,id_marca=?,modelo=?,anio=?,cap_carga=?,vol_carga=?,dir_img=? where id_vehiculo=?";
     private String INSERT_FACTURA_STMT  = "insert into facturas(key,calle,colonia,municipio,id_estado,tipo_envio,vol_carga,peso_carga,fecha_salida,fecha_entrega,costo) values (?,?,?,?,?,?,?,?,?,?,?)";
-    private String SELECT_FACTURA_STMT = "select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv where facturas.`key` = ?";
+    private String SELECT_FACTURA_STMT = "select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega,facturas.retraso,facturas.costo from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv where facturas.`key` = ?";
+    private String SELECT_ALLFACTURAS_STMT ="select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega,facturas.retraso,facturas.costo from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv ";
+    private String SELECT_ESTADOS_STMT = "select estados.estado from estados";
+    
     private Connection con;
     public DBCon(){
         try {
@@ -52,6 +55,19 @@ public class DBCon {
             System.out.println(e);
         }
         return marcas;
+    }
+    public ArrayList<String> obtenerEstados(){
+        ArrayList<String> estados = new ArrayList<>();
+        try {
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(SELECT_ESTADOS_STMT);
+            while(rs.next()){
+                estados.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return estados;
     }
     public void nuevoVehiculo(String matr,short marca,String modelo,short anio,int capCarga,int volCarga,String dirImg) throws SQLException{
             PreparedStatement pm = con.prepareStatement(INSERT_VEHICULOS_STMT);
@@ -144,8 +160,35 @@ public class DBCon {
             f.setPesoCarga(rs.getFloat(9));
             f.setFechaSalida(new Fecha(rs.getDate(10).getTime()));
             f.setFechaEntrega(new Fecha(rs.getDate(11).getTime()));
+            f.setRetraso(rs.getShort(12));
+            f.setPrecioNeto(rs.getFloat(13));
         }
         return f;
+    }
+    public ArrayList<Factura> obtenerFacturas() throws SQLException{
+        PreparedStatement pm = con.prepareStatement(SELECT_ALLFACTURAS_STMT);
+        ResultSet rs = pm.executeQuery();
+        ArrayList<Factura> facts = new ArrayList<>();
+        while(rs.next()){
+            Factura f = new Factura();
+            f.setId(rs.getInt(1));//ID
+            f.setKey(rs.getString(2));//Llave
+            Direccion dir = new Direccion();
+            dir.setCalle(rs.getString(3));
+            dir.setColonia(rs.getString(4));
+            dir.setMunicipio(rs.getString(5));
+            dir.setEstado(rs.getString(6));
+            f.setDir(dir);
+            f.setTipoEnvio(rs.getString(7));
+            f.setVolCarga(rs.getFloat(8));
+            f.setPesoCarga(rs.getFloat(9));
+            f.setFechaSalida(new Fecha(rs.getDate(10).getTime()));
+            f.setFechaEntrega(new Fecha(rs.getDate(11).getTime()));
+            f.setRetraso(rs.getShort(12));            
+            f.setPrecioNeto(rs.getFloat(13));
+            facts.add(f);
+        }
+        return facts;
     }
     public void cerrar(){
         try {
