@@ -25,15 +25,16 @@ import me.sebas.transpomex.vehiculo.Vehiculo;
 public class DBCon {
     
     private String SELECT_VEHICULOS_STMT = "select vehiculos.id_vehiculo,estados_vehiculos.estado,vehiculos.matr,marcas.marca,vehiculos.modelo,vehiculos.anio,vehiculos.cap_carga,vehiculos.vol_carga,vehiculos.km_recorridos,vehiculos.km_servicio,vehiculos.dir_img from vehiculos join marcas on vehiculos.id_marca = marcas.id_marca join estados_vehiculos on vehiculos.id_estado = estados_vehiculos.id_estado";
+    private String SELECT_VEHICULOS_DISP_STMT = "select vehiculos.id_vehiculo,estados_vehiculos.estado,vehiculos.matr,marcas.marca,vehiculos.modelo,vehiculos.anio,vehiculos.cap_carga,vehiculos.vol_carga,vehiculos.km_recorridos,vehiculos.km_servicio,vehiculos.dir_img from vehiculos join marcas on vehiculos.id_marca = marcas.id_marca join estados_vehiculos on vehiculos.id_estado = estados_vehiculos.id_estado where vehiculos.id_estado = 1";    
     private String INSERT_VEHICULOS_STMT = "insert into vehiculos(matr,id_marca,modelo,anio,cap_carga,vol_carga,dir_img) values (?,?,?,?,?,?,?)";
     private String SELECT_MARCAS_STMT = "select marcas.marca from marcas order by marcas.marca asc";
     private String DELETE_VEHICULOS_STMT = "delete from vehiculos where vehiculos.id_vehiculo = ?";
     private String UPDATE_VEHICULOS_STMT = "update vehiculos set matr =?,id_marca=?,modelo=?,anio=?,cap_carga=?,vol_carga=?,dir_img=? where id_vehiculo=?";
-    private String INSERT_FACTURA_STMT  = "insert into facturas(key,calle,colonia,municipio,id_estado,tipo_envio,vol_carga,peso_carga,fecha_salida,fecha_entrega,costo) values (?,?,?,?,?,?,?,?,?,?,?)";
-    private String SELECT_FACTURA_STMT = "select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega,facturas.retraso,facturas.costo from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv where facturas.`key` = ?";
-    private String SELECT_ALLFACTURAS_STMT ="select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega,facturas.retraso,facturas.costo from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv ";
+    private String INSERT_FACTURA_STMT  = "insert into facturas(`key`,calle,colonia,municipio,id_estado,tipo_envio,vol_carga,peso_carga,fecha_salida,fecha_entrega,costo,id_vehiculo) values (?,?,?,?,?,?,?,?,?,?,?,?)";
+    private String SELECT_FACTURA_STMT = "select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega,facturas.retraso,facturas.costo,vehiculos.matr from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv join vehiculos on facturas.id_vehiculo = vehiculos.id_vehiculo where facturas.`key` = ?";
+    private String SELECT_ALLFACTURAS_STMT ="select facturas.id_factura,facturas.key,facturas.calle,facturas.colonia,facturas.municipio,estados.estado,tipo_envios.tipo,facturas.vol_carga,facturas.peso_carga,facturas.fecha_salida,facturas.fecha_entrega,facturas.retraso,facturas.costo,vehiculos.matr from facturas join estados on facturas.id_estado = estados.id_estadomex join tipo_envios on facturas.tipo_envio = tipo_envios.id_tipoenv join vehiculos on facturas.id_vehiculo = vehiculos.id_vehiculo";
     private String SELECT_ESTADOS_STMT = "select estados.estado from estados";
-    
+    private String UPDATE_ESTADO_VEHICULO_STMT = "update vehiculos set vehiculos.id_estado = 2 where vehiculos.id_vehiculo = ?";
     private Connection con;
     public DBCon(){
         try {
@@ -104,6 +105,27 @@ public class DBCon {
         }
         return list;
     }
+    public ArrayList<Vehiculo> obtenerVehiculosDisp() throws SQLException{
+        ArrayList<Vehiculo> list = new ArrayList<Vehiculo>();
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(SELECT_VEHICULOS_DISP_STMT);
+        while(rs.next()){
+            Vehiculo v = 
+                    new Vehiculo(rs.getString(3),//Matricula
+                            rs.getString(5),//Modelo
+                            rs.getShort(6),//Año
+                            rs.getString(4),//Fabricante
+                            rs.getInt(8),//Volúmen carga
+                            rs.getInt(7),//Capacidad carga
+                            rs.getInt(1),//ID
+                            rs.getInt(9),//Km Servicio
+                            rs.getInt(10),//Km Recorrido
+                            rs.getString(2),//Estado
+                            rs.getString(11));//Dir img
+            list.add(v);
+        }
+        return list;
+    }
     public void eliminarVehiculo(int idVehiculo) throws SQLException{
         PreparedStatement ps = con.prepareStatement(DELETE_VEHICULOS_STMT);
         ps.setInt(1, idVehiculo);
@@ -126,19 +148,25 @@ public class DBCon {
             pm.execute();
         }
     //insert into facturas(key,calle,colonia,municipio,id_estado,tipo_envio,vol_carga,peso_carga,fecha_salida,fecha_entrega,costo) values (?,?,?,?,?,?,?,?,?,?,?)";
-    public void nuevaFactura(Factura f,short idEstado,short idTipoEnv,float volCarga,float pesoCarga,Fecha fechaSalida,Fecha fechaEntrega,float costo) throws SQLException{
+    public void nuevaFactura(Factura f,int idEstado,int idTipoEnv) throws SQLException, Exception{
+        int idCamion = 0;
         PreparedStatement pm = con.prepareStatement(INSERT_FACTURA_STMT);
         pm.setString(1,f.getKey());//Llave
         pm.setString(2,f.getDir().getCalle());//Calle
         pm.setString(3,f.getDir().getColonia());//Colonia
         pm.setString(4, f.getDir().getMunicipio());//Municipio
         pm.setInt(5,idEstado);//Id Estado
-        pm.setShort(6, idTipoEnv);//Tipo de Envio
+        pm.setShort(6, (short) idTipoEnv);//Tipo de Envio
         pm.setFloat(7, f.getVolCarga());//Vol Carga
         pm.setFloat(8, f.getPesoCarga());//Peso Carga
         pm.setDate(9,new java.sql.Date(f.getFechaEntrega().toMills()));//Fecha salida
         pm.setDate(10,new java.sql.Date(f.getFechaSalida().toMills()));//Fecha entrega
-        pm.setFloat(11,costo);//Costo
+        pm.setFloat(11,f.getPrecioNeto());//Costo
+        idCamion = buscarCamion(f.getVolCarga(), f.getPesoCarga());
+        if(idCamion < 0)
+            throw new Exception();
+        ocuparCamion(idCamion);
+        pm.setInt(12, idCamion);
         pm.executeUpdate();
     }
     public Factura verFactura(String key) throws SQLException{
@@ -162,6 +190,7 @@ public class DBCon {
             f.setFechaEntrega(new Fecha(rs.getDate(11).getTime()));
             f.setRetraso(rs.getShort(12));
             f.setPrecioNeto(rs.getFloat(13));
+            f.setMatrTransporte(rs.getString(14));
         }
         return f;
     }
@@ -186,9 +215,24 @@ public class DBCon {
             f.setFechaEntrega(new Fecha(rs.getDate(11).getTime()));
             f.setRetraso(rs.getShort(12));            
             f.setPrecioNeto(rs.getFloat(13));
+            f.setMatrTransporte(rs.getString(14));
             facts.add(f);
         }
         return facts;
+    }
+    private int buscarCamion(float vol,float peso) throws SQLException{
+        ArrayList<Vehiculo> vDisp = obtenerVehiculosDisp();
+        for (Vehiculo vehiculo : vDisp) {
+            if(vehiculo.getVolCarga() >= vol && vehiculo.getCapCarga() >= peso){
+                return vehiculo.getId();
+            }
+        }
+        return -1;
+    }
+    private void ocuparCamion(int idCamion) throws SQLException{
+        PreparedStatement ps = con.prepareStatement(UPDATE_ESTADO_VEHICULO_STMT);
+        ps.setInt(1, idCamion);
+        ps.executeUpdate();
     }
     public void cerrar(){
         try {

@@ -18,12 +18,19 @@
             <artifactId>mariadb-java-client</artifactId>
             <version>1.2.0</version>
         </dependency>
-    <!--Utilidad para archivos CSV-->
+        <!--Utilidad para archivos CSV-->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.10</version>
+        </dependency>
+
     </dependencies>
 </project>

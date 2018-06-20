@@ -35,10 +35,10 @@ public class ReportesCSV {
     public static void reporteFacturas() throws IOException, SQLException{
         DBCon con = new DBCon();
         FileWriter out = new FileWriter(new File("reporteFacturas.csv"));
-        CSVPrinter printer = new CSVPrinter(out,CSVFormat.RFC4180.withHeader("Id Factura","Key","Calle","Colonia","Municipio","Estado","Tipo de Envío","Vol. Carga","Peso Carga","Fecha de Salida","Fecha de Entrega","Retraso","Precio Final"));
+        CSVPrinter printer = new CSVPrinter(out,CSVFormat.RFC4180.withHeader("Id Factura","Key","Calle","Colonia","Municipio","Estado","Tipo de Envío","Vol. Carga","Peso Carga","Fecha de Salida","Fecha de Entrega","Retraso","Precio Final","Matricula del Transporte"));
         ArrayList<Factura> regs = con.obtenerFacturas();
         for (Factura reg : regs) {
-            printer.printRecord(reg.getId(),reg.getKey(),reg.getDir().getCalle(),reg.getDir().getColonia(),reg.getDir().getMunicipio(),reg.getDir().getEstado(),reg.getTipoEnvio(),reg.getVolCarga(),reg.getPesoCarga(),reg.getFechaSalida(),reg.getFechaEntrega(),reg.getRetraso(),reg.getPrecioNeto());
+            printer.printRecord(reg.getId(),reg.getKey(),reg.getDir().getCalle(),reg.getDir().getColonia(),reg.getDir().getMunicipio(),reg.getDir().getEstado(),reg.getTipoEnvio(),reg.getVolCarga(),reg.getPesoCarga(),reg.getFechaSalida(),reg.getFechaEntrega(),reg.getRetraso(),reg.getPrecioNeto(),reg.getMatrTransporte());
         }
         out.flush();
         con.cerrar();

@@ -17,10 +17,13 @@ import java.util.Properties;
  * @author deckard
  */
 public class Configuracion {
-  
+    public static int RANGO_ENVIO_EXPRES = 7;
+    public static float TARIFA_EXPRES = 100f;//Tarifa de peso/vol expres
+    public static float TARIFA_BASICA = 75f;//Tarifa de peso/vol básica
+    public static int COSTO_DIA = 100;
     public static float IVA = 0.16f;
-    public static float CAJA_PESO = 15;
-    public static float CAJA_VOL = 0.125f;
+    public static float CAJA_PESO = 20;
+    public static float CAJA_VOL = 1;
     private static float CAJA_LARGO = 0.5f;
     private static float CAJA_ALTO = 0.5f;
     private static float CAJA_ANCHO = 0.5f;

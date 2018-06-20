@@ -1,3 +1,5 @@
-Id Factura,Key,Calle,Colonia,Municipio,Estado,Tipo de Envío,Vol. Carga,Peso Carga,Fecha de Salida,Fecha de Entrega,Retraso
-1,0,Av8,Buenos Aires,Miguel Hidalgo,Baja California Sur,Local,34.5,12.3,2018-5-1,2018-5-3,0
-2,KGF9UO,Av8,Buenos Aires,Miguel Hidalgo,Baja California Sur,Local,34.5,12.3,2018-5-1,2018-5-3,0
+Id Factura,Key,Calle,Colonia,Municipio,Estado,Tipo de Envío,Vol. Carga,Peso Carga,Fecha de Salida,Fecha de Entrega,Retraso,Precio Final
+1,0,Av8,Buenos Aires,Miguel Hidalgo,Baja California Sur,Local,34.5,12.3,2018-5-1,2018-5-3,0,990.0
+2,KGF9UO,Av8,Buenos Aires,Miguel Hidalgo,Baja California Sur,Local,34.5,12.3,2018-5-1,2018-5-3,0,990.0
+3,adb,calle,col,muni,Aguascalientes,Local,2.0,60.0,2018-8-10,2018-8-11,0,1900.0
+4,N/JHmU,Malinalco,El Barco,Nezahualcoyotl,Aguascalientes,Local,2.0,20.0,2018-5-25,2018-5-20,0,1160.0

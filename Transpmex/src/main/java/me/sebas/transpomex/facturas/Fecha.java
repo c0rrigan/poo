@@ -36,23 +36,27 @@ public class Fecha {
     private final int mes;
     private final int anio;
     private final int dia;
-
+    private Calendar c;
     public Fecha(int mes, int anio, int dia) {
         this.mes = mes;
         this.anio = anio;
         this.dia = dia;
+        c = Calendar.getInstance();
+        c.set(anio,mes,dia);
     }
     public Fecha(long mills){
-        Calendar c = Calendar.getInstance();
+        c = Calendar.getInstance();
         c.setTimeInMillis(mills);   
         this.mes = c.get(Calendar.MONTH);
         this.anio = c.get(Calendar.YEAR);
         this.dia = c.get(Calendar.DAY_OF_MONTH);
     }
     public long toMills(){
-        Calendar c = Calendar.getInstance();
         c.set(getAnio(), getMes(), getDia());
         return c.getTimeInMillis();
+    }
+    public Calendar getCalendar(){
+        return c;
     }
 
     @Override

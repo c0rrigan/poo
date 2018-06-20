@@ -17,6 +17,20 @@ import java.util.Base64;
 public class Factura {
 
     /**
+     * @return the matrTransporte
+     */
+    public String getMatrTransporte() {
+        return matrTransporte;
+    }
+
+    /**
+     * @param matrTransporte the matrTransporte to set
+     */
+    public void setMatrTransporte(String matrTransporte) {
+        this.matrTransporte = matrTransporte;
+    }
+
+    /**
      * @return the id
      */
     public int getId() {
@@ -164,9 +178,12 @@ public class Factura {
     private Fecha fechaSalida;
     private Fecha fechaEntrega;
     private short retraso;
+    private String matrTransporte;
     private float precioNeto;
 
     public Factura() {
+        int id = 0;
+        int retraso = 0;
     }
 /**
  * Constructor para una nueva instancia de factura
@@ -198,7 +215,7 @@ public class Factura {
         }
     }
         
-    public String obtenerHash(){
+    private String obtenerHash(){
         byte res[] = {0};
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -209,6 +226,10 @@ public class Factura {
         }  
         return Base64.getEncoder().encodeToString(res).substring(0, 6);
     }
+    public void hash(){
+        key = obtenerHash();
+    }
+    
  
     
 }
