@@ -17,10 +17,18 @@ public class ImagePanel extends JPanel{
 
     public ImagePanel(String url){
         try {
-            img = ImageIO.read(getClass().getClassLoader().getResource("default.jpg"));
+            img = ImageIO.read(getClass().getClassLoader().getResource("default.png"));
         } catch (IOException e) {
             System.err.println("No se pudo cargar el archivo\nError:\n"+e);
         }
+    }
+    public void setImage(String url){
+        try {
+            img = ImageIO.read(new File(url));
+        } catch (IOException e) {
+            System.err.println("No se pudo cargar el archivo\nError:\n"+e);
+        }
+        this.revalidate();
     }
 
     @Override

@@ -215,7 +215,7 @@ public class Vehiculo implements Transporte{
 
     @Override
     public String toString() {
-        return matricula+" : "+fabricante+" "+modelo;
+        return matricula+" : "+fabricante+" - "+modelo;
     }
     
 }

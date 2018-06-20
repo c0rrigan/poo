@@ -24,10 +24,10 @@ public class ReportesCSV {
     public static void reporteVehiculos() throws IOException,SQLException{
         DBCon con = new DBCon();
         FileWriter out = new FileWriter(new File("reporteVehiculo.csv"));
-        CSVPrinter printer = new CSVPrinter(out,CSVFormat.RFC4180.withHeader("Id Factura","Key","Calle","Colonia","Municipio","Estado","Tipo de Envío","Vol. Carga","Peso Carga","Fecha de Salida","Fecha de Entrega","Retraso"));
+        CSVPrinter printer = new CSVPrinter(out,CSVFormat.RFC4180.withHeader("Identificador","Estado","Matricula","Fabricante","Modelo","Cap. Carga","Vol. Carga","Km Recorridos","Km. Servicio"));
         ArrayList<Vehiculo> regs = con.obtenerVehiculos();
         for (Vehiculo reg : regs) {
-            printer.printRecord(reg.getId(),reg.getEstado(),reg.getMatricula(),reg.getFabricante(),reg.getModelo(),reg.getAnio(),reg.getCapCarga(),reg.getVolCarga(),reg.getKmRecorridos(),reg.getKmServicio());
+            printer.printRecord(reg.getId(),reg.getEstado(),reg.getMatricula(),reg.getFabricante(),reg.getModelo(),reg.getCapCarga(),reg.getVolCarga(),reg.getKmRecorridos(),reg.getKmServicio());
         }
         out.flush();
         con.cerrar();

@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,15 +44,20 @@ public class VehiculosGui extends javax.swing.JFrame {
     private File selectedImg;
     private DefaultListModel vListModel;
     private DecimalFormat numFormat = new DecimalFormat("##.##");
+    private Vehiculo selVehiculo;
 
     public VehiculosGui() {
+        selVehiculo = null;
         fc = new JFileChooser();
         db = new DBCon();
         vListModel = new DefaultListModel<>();
         initComponents();
+        //Ponr a tiempo los spinners/combos de fecha
         java.time.LocalDateTime date = java.time.LocalDateTime.now();
         diaSpinner.setValue(date.getDayOfMonth());
         mesSpinner.setSelectedIndex(date.getMonth().getValue() - 1);
+        //Mostrat valores de registros de vehiculos
+        mostrarRegistrosVehiculos();
     }
 
     /**
@@ -68,9 +74,9 @@ public class VehiculosGui extends javax.swing.JFrame {
         vehiculosTab = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         mostrar = new javax.swing.JPanel();
-        jPanel3 = new ImagePanel("resources/default.jpg");
+        imgPanel = new ImagePanel("resources/default.jpg");
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        matrLabel = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -81,9 +87,9 @@ public class VehiculosGui extends javax.swing.JFrame {
         volCargaLabel = new javax.swing.JLabel();
         kmRecorridosLabel = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
-        jButton5 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        servicioLabel = new javax.swing.JLabel();
+        editButton = new javax.swing.JButton();
+        borrarButton = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jLabel13 = new javax.swing.JLabel();
         reportButton = new javax.swing.JButton();
@@ -102,10 +108,8 @@ public class VehiculosGui extends javax.swing.JFrame {
         openImageButton = new javax.swing.JButton();
         pathLabel = new javax.swing.JLabel();
         registrarButton = new javax.swing.JButton();
-        jLabel16 = new javax.swing.JLabel();
         matrTF = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
-        anioSpinner = new javax.swing.JSpinner();
         factuarasTab = new javax.swing.JPanel();
         nuevo = new javax.swing.JPanel();
         jLabel18 = new javax.swing.JLabel();
@@ -150,31 +154,32 @@ public class VehiculosGui extends javax.swing.JFrame {
         jLabel31 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Transpomex v1.0");
 
         jLabel1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel1.setText("Vehiculos");
 
         mostrar.setBorder(javax.swing.BorderFactory.createTitledBorder("Mostrar"));
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        imgPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout imgPanelLayout = new javax.swing.GroupLayout(imgPanel);
+        imgPanel.setLayout(imgPanelLayout);
+        imgPanelLayout.setHorizontalGroup(
+            imgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        imgPanelLayout.setVerticalGroup(
+            imgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 96, Short.MAX_VALUE)
         );
 
         jLabel2.setText("Modelo:");
 
-        jLabel3.setFont(new java.awt.Font("Consolas", 1, 18)); // NOI18N
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("12");
-        jLabel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Matricula"));
+        matrLabel.setFont(new java.awt.Font("Consolas", 1, 18)); // NOI18N
+        matrLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        matrLabel.setText("-");
+        matrLabel.setBorder(javax.swing.BorderFactory.createTitledBorder("Matricula"));
 
         jLabel4.setText("Marca:");
 
@@ -196,16 +201,26 @@ public class VehiculosGui extends javax.swing.JFrame {
 
         jLabel11.setText("Servicio(km):");
 
-        jLabel12.setText("jLabel12");
+        servicioLabel.setText("jLabel12");
 
-        jButton5.setText("Editar");
+        editButton.setText("Editar");
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
 
-        jButton3.setText("Borrar");
+        borrarButton.setText("Borrar");
+        borrarButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                borrarButtonActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("Servicio");
 
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel13.setText("jLabel13");
+        jLabel13.setText("Foto");
 
         javax.swing.GroupLayout mostrarLayout = new javax.swing.GroupLayout(mostrar);
         mostrar.setLayout(mostrarLayout);
@@ -230,18 +245,18 @@ public class VehiculosGui extends javax.swing.JFrame {
                             .addComponent(capCargaLabel)
                             .addComponent(volCargaLabel)
                             .addComponent(kmRecorridosLabel)
-                            .addComponent(jLabel12))
+                            .addComponent(servicioLabel))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mostrarLayout.createSequentialGroup()
                         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(mostrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(editButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(borrarButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mostrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(imgPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(matrLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -273,16 +288,16 @@ public class VehiculosGui extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(mostrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel11)
-                            .addComponent(jLabel12)))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(servicioLabel)))
+                    .addComponent(imgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mostrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mostrarLayout.createSequentialGroup()
-                        .addComponent(jButton5)
+                        .addComponent(editButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton3))
+                        .addComponent(borrarButton))
                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(matrLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         reportButton.setText("Reporte");
@@ -297,7 +312,7 @@ public class VehiculosGui extends javax.swing.JFrame {
         vList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(vList);
 
-        jButton1.setText("jButton1");
+        jButton1.setText("Seleccionar");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -341,9 +356,6 @@ public class VehiculosGui extends javax.swing.JFrame {
             }
         });
 
-        jLabel16.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel16.setText("Año:");
-
         matrTF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 matrTFActionPerformed(evt);
@@ -384,18 +396,14 @@ public class VehiculosGui extends javax.swing.JFrame {
                                         .addComponent(openImageButton)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(pathLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 6, Short.MAX_VALUE)))
+                                .addGap(0, 21, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(registrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(registrarLayout.createSequentialGroup()
                                 .addComponent(jLabel14)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(volCargaSpinner, javax.swing.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE))
-                            .addComponent(registrarButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(registrarLayout.createSequentialGroup()
-                                .addComponent(jLabel16)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(anioSpinner)))))
+                                .addComponent(volCargaSpinner, javax.swing.GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE))
+                            .addComponent(registrarButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         registrarLayout.setVerticalGroup(
@@ -416,9 +424,7 @@ public class VehiculosGui extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(registrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(matrTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel16)
-                    .addComponent(jLabel17)
-                    .addComponent(anioSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel17))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(registrarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(openImageButton)
@@ -887,10 +893,10 @@ public class VehiculosGui extends javax.swing.JFrame {
         f.setVolCarga(calcularVolumen());
         f.setPesoCarga(calcularPeso());
         float precio = calcularTarifa(fecha.getCalendar());
-        f.setPrecioNeto(precio*(1+Configuracion.IVA));
+        f.setPrecioNeto(precio * (1 + Configuracion.IVA));
         f.hash();
         try {
-            db.nuevaFactura(f,estadoTF.getSelectedIndex()+1,1+tipoEnvioCombo.getSelectedIndex());
+            db.nuevaFactura(f, estadoTF.getSelectedIndex() + 1, 1 + tipoEnvioCombo.getSelectedIndex());
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error al procesar la transacción", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println(ex);
@@ -916,17 +922,30 @@ public class VehiculosGui extends javax.swing.JFrame {
         short marca = (short) (marcasCombo.getSelectedIndex() + 1);
         int capCarga = Integer.parseInt(capCargaSpinner.getValue().toString());
         int volCarga = Integer.parseInt(volCargaSpinner.getValue().toString());
-        short anioFabr = Short.parseShort(anioSpinner.getValue().toString());
-        if (modelo.isEmpty() || matricula.isEmpty() || capCarga == 0 || volCarga == 0 || anioFabr == 0) {
+        short anioFabr = 0;
+        if (modelo.isEmpty() || matricula.isEmpty() || capCarga == 0 || volCarga == 0) {
             JOptionPane.showMessageDialog(this, "Llene todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        Vehiculo v = new Vehiculo(matricula, modelo, anioFabr, marcasCombo.getSelectedItem().toString(), volCarga, capCarga, 0, 0, 0, "", "");
+        v.setId(selVehiculo.getId());
+        v.setIdMarca(marca);
         try {
             if (selectedImg == null) {
-                db.nuevoVehiculo(matricula, marca, modelo, anioFabr, capCarga, volCarga, "");
+                if (selVehiculo != null) {
+                    v.setImg("src\\main\\resources\\default.png");
+                    db.modificarVehiculo(v);//Modificar
+                } else {
+                    db.nuevoVehiculo(matricula, marca, modelo, anioFabr, capCarga, volCarga, "src\\main\\resources\\default.png");
+                }
             } else {
                 nuevaImg = new File("src\\main\\resources\\" + matricula + selectedImg.getName());
-                db.nuevoVehiculo(matricula, marca, modelo, anioFabr, capCarga, volCarga, nuevaImg.toPath().toString());
+                if (selVehiculo != null){
+                    v.setImg(nuevaImg.toPath().toString());
+                    db.modificarVehiculo(v);//Modificar
+                } else {
+                    db.nuevoVehiculo(matricula, marca, modelo, anioFabr, capCarga, volCarga, nuevaImg.toPath().toString());
+                }
                 Files.copy(selectedImg.toPath(), nuevaImg.toPath(), COPY_ATTRIBUTES);
             }
         } catch (IOException ex) {
@@ -935,9 +954,25 @@ public class VehiculosGui extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "No se pudo satisfacer su solicitud", "Error", JOptionPane.ERROR_MESSAGE);
             System.err.println(ex);
         }
+        selVehiculo = null;
         limpiarRegistro();
         JOptionPane.showMessageDialog(this, "Registro exitoso", "Atención", JOptionPane.INFORMATION_MESSAGE);
+        mostrarRegistrosVehiculos();
     }//GEN-LAST:event_registrarButtonActionPerformed
+
+    private void mostrarRegistrosVehiculos() {
+        vListModel.clear();
+        try {
+            ArrayList<Vehiculo> vs = db.obtenerVehiculos();
+            for (Vehiculo v : vs) {
+                //vListModel.addElement(v.getMatricula()+"-"+v.getModelo()+"-"+v.getFabricante());
+                vListModel.addElement(v);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al obtener los datos de la base", "Error", JOptionPane.ERROR_MESSAGE);
+            System.err.println(e);
+        }
+    }
 
     private void openImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openImageButtonActionPerformed
         fc.setMultiSelectionEnabled(false);
@@ -963,10 +998,19 @@ public class VehiculosGui extends javax.swing.JFrame {
     }//GEN-LAST:event_marcasComboActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        vListModel.addElement("Evee");
-        vList.setModel(vListModel);
+        Vehiculo vehiculoSelect = (Vehiculo) vListModel.get(vList.getSelectedIndex());
+        mostrarVehiculo(vehiculoSelect);
     }//GEN-LAST:event_jButton1ActionPerformed
-
+    private void mostrarVehiculo(Vehiculo v) {
+        modeloLabel.setText(v.getModelo());
+        marcaLabel.setText(v.getFabricante());
+        capCargaLabel.setText(Float.toString(v.getCapCarga()));
+        volCargaLabel.setText(Float.toString(v.getVolCarga()));
+        matrLabel.setText(v.getMatricula());
+        kmRecorridosLabel.setText(Integer.toString(v.getKmRecorridos()));
+        servicioLabel.setText(Integer.toString(v.getKmServicio()));
+        ((ImagePanel) imgPanel).setImage(v.getImg());
+    }
     private void reportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reportButtonActionPerformed
         try {
             ReportesCSV.reporteVehiculos();
@@ -974,6 +1018,7 @@ public class VehiculosGui extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al producir el reporte", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println(e);
         }
+        JOptionPane.showMessageDialog(this, "Reporte producido exitosamente", "Error", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_reportButtonActionPerformed
 
     private void estadoTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_estadoTFActionPerformed
@@ -1020,13 +1065,13 @@ public class VehiculosGui extends javax.swing.JFrame {
         try {
             ReportesCSV.reporteFacturas();
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Error al escribir el archivo","Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al escribir el archivo", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println(ex);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al procesar la transacción en la base de datos","Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al procesar la transacción en la base de datos", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println(ex);
         }
-        JOptionPane.showMessageDialog(this, "Reporte generado exitosamente","Reporte",JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Reporte generado exitosamente", "Reporte", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_reporteEnviosActionPerformed
 
     private void buscarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarButtonActionPerformed
@@ -1035,11 +1080,49 @@ public class VehiculosGui extends javax.swing.JFrame {
         try {
             fact = db.verFactura(key);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al procesar la transacción en la base de datos","Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al procesar la transacción en la base de datos", "Error", JOptionPane.ERROR_MESSAGE);
             System.out.println(ex);
         }
-        JOptionPane.showMessageDialog(this,"Identificador: "+fact.getKey(), "Envío", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Identificador: " + fact.getKey(), "Envío", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_buscarButtonActionPerformed
+
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
+        if (vList.getSelectedIndex() < 0) {
+            return;
+        }
+        selVehiculo = (Vehiculo) vListModel.get(vList.getSelectedIndex());
+        modeloTF.setText(selVehiculo.getModelo());
+        capCargaSpinner.setValue(selVehiculo.getCapCarga());
+        volCargaSpinner.setValue(selVehiculo.getVolCarga());
+        matrTF.setText(selVehiculo.getMatricula());
+        selectedImg = new File(selVehiculo.getImg());
+        try {
+            marcasCombo.setSelectedIndex(db.obtenerIdMarca(selVehiculo.getFabricante()) - 1);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "No se pudieron obtener todos los datos del registro", "Error", JOptionPane.ERROR_MESSAGE);
+            System.out.println(e);
+        }
+    }//GEN-LAST:event_editButtonActionPerformed
+
+    private void borrarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_borrarButtonActionPerformed
+        Vehiculo currVehiculo = new Vehiculo();
+        System.out.println(vList.getSelectedIndex());
+        if (vList.getSelectedIndex() < 0) {
+            return;
+        }
+        currVehiculo = (Vehiculo) vListModel.get(vList.getSelectedIndex());
+        int del = JOptionPane.showConfirmDialog(this, "¿Borrar registro:" + currVehiculo.getMatricula() + "?", "Advertencia", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (del == JOptionPane.YES_NO_CANCEL_OPTION) {
+            System.out.println("Cancelar");
+        }
+        try {
+            db.eliminarVehiculo(currVehiculo.getId());
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "No se pudieron eliminar los datos del registro", "Error", JOptionPane.ERROR_MESSAGE);
+            System.out.println(ex);
+        }
+        mostrarRegistrosVehiculos();
+    }//GEN-LAST:event_borrarButtonActionPerformed
 
     private void limpiarRegistro() {
         matrTF.setText("");
@@ -1072,8 +1155,9 @@ public class VehiculosGui extends javax.swing.JFrame {
         //Instancia de calendario configurada al maximo de días para el 
         //envio expres
         int dias = diasDiferencia(c, entrega);
-        if(dias < 0)
+        if (dias < 0) {
             return 0f;
+        }
         c.add(Calendar.DAY_OF_MONTH, Configuracion.RANGO_ENVIO_EXPRES);
         float vol = calcularVolumen();
         if (entrega.after(c)) {
@@ -1105,11 +1189,12 @@ public class VehiculosGui extends javax.swing.JFrame {
         }
         return res;
     }
-    private float calcularPeso(){
+
+    private float calcularPeso() {
         float res = 0f;
         if (dimensionesRadio.isSelected()) {
             res = Float.parseFloat(pesoSpinner.getValue().toString());
-        }else{
+        } else {
             int cajas = Integer.parseInt(cajasSpinner.getValue().toString());
             res = Configuracion.CAJA_PESO;
         }
@@ -1117,8 +1202,6 @@ public class VehiculosGui extends javax.swing.JFrame {
     }
 
     private int diasDiferencia(Calendar salida, Calendar entrega) {
-        System.out.println("salida:" + salida.getTime().toString());
-        System.out.println("entrega:" + entrega.getTime().toString());
         return Days.daysBetween(new LocalDateTime(salida.getTimeInMillis()), new LocalDateTime(entrega.getTimeInMillis())).getDays();
     }
 
@@ -1157,8 +1240,8 @@ public class VehiculosGui extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner altoSpinner;
     private javax.swing.JSpinner anchoSpinner;
-    private javax.swing.JSpinner anioSpinner;
     private javax.swing.JSpinner anioSpinnerEnvio;
+    private javax.swing.JButton borrarButton;
     private javax.swing.JButton buscarButton;
     private javax.swing.JTextField buscarTF;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -1171,21 +1254,19 @@ public class VehiculosGui extends javax.swing.JFrame {
     private javax.swing.JLabel costoLabel;
     private javax.swing.JSpinner diaSpinner;
     private javax.swing.JRadioButton dimensionesRadio;
+    private javax.swing.JButton editButton;
     private javax.swing.JButton enviarButton;
     private javax.swing.JComboBox<String> estadoTF;
     private javax.swing.JPanel factuarasTab;
+    private javax.swing.JPanel imgPanel;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
@@ -1199,7 +1280,6 @@ public class VehiculosGui extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel4;
@@ -1209,7 +1289,6 @@ public class VehiculosGui extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
@@ -1219,6 +1298,7 @@ public class VehiculosGui extends javax.swing.JFrame {
     private javax.swing.JLabel kmRecorridosLabel;
     private javax.swing.JLabel marcaLabel;
     private javax.swing.JComboBox<String> marcasCombo;
+    private javax.swing.JLabel matrLabel;
     private javax.swing.JTextField matrTF;
     private javax.swing.JComboBox<String> mesSpinner;
     private javax.swing.JLabel modeloLabel;
@@ -1235,6 +1315,7 @@ public class VehiculosGui extends javax.swing.JFrame {
     private javax.swing.JButton registrarButton;
     private javax.swing.JButton reportButton;
     private javax.swing.JButton reporteEnvios;
+    private javax.swing.JLabel servicioLabel;
     private javax.swing.JComboBox<String> tipoEnvioCombo;
     private javax.swing.JList<String> vList;
     private javax.swing.JPanel vehiculosTab;
